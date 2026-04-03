@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/data/products";
 
 interface ProductSwitcherProps {
@@ -9,72 +10,104 @@ interface ProductSwitcherProps {
   onProductChange: (index: number) => void;
 }
 
+const VISIBLE_COUNT = 5;
+
+function getVisibleRange(activeIndex: number, total: number) {
+  const half = Math.floor(VISIBLE_COUNT / 2);
+  let start = activeIndex - half;
+  if (start < 0) start = 0;
+  if (start + VISIBLE_COUNT > total) start = Math.max(0, total - VISIBLE_COUNT);
+  return { start, end: Math.min(start + VISIBLE_COUNT, total) };
+}
+
+function getInitial(name: string): string {
+  return name.charAt(0).toUpperCase();
+}
+
 export default function ProductSwitcher({
   products,
   activeIndex,
   onProductChange,
 }: ProductSwitcherProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { start, end } = getVisibleRange(activeIndex, products.length);
+  const visible = products.slice(start, end);
 
-  // Scroll active thumbnail into view
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const active = container.children[activeIndex] as HTMLElement | undefined;
-    if (active) {
-      active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }
-  }, [activeIndex]);
+  const goPrev = () => onProductChange((activeIndex - 1 + products.length) % products.length);
+  const goNext = () => onProductChange((activeIndex + 1) % products.length);
 
-  // Touch swipe support
+  // Touch swipe
   useEffect(() => {
     let startX = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-    };
-    const handleTouchEnd = (e: TouchEvent) => {
+    const onStart = (e: TouchEvent) => { startX = e.touches[0].clientX; };
+    const onEnd = (e: TouchEvent) => {
       const diff = startX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          onProductChange(Math.min(activeIndex + 1, products.length - 1));
-        } else {
-          onProductChange(Math.max(activeIndex - 1, 0));
-        }
+        diff > 0 ? goNext() : goPrev();
       }
     };
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchend", onEnd, { passive: true });
     return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchend", onEnd);
     };
-  }, [activeIndex, products.length, onProductChange]);
+  });
 
   return (
-    <div className="hero-thumbs absolute bottom-14 md:bottom-10 left-0 right-0 z-20 flex justify-center px-4">
-      <div
-        ref={scrollRef}
-        className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar max-w-full py-2 px-2"
-        style={{ scrollbarWidth: "none" }}
+    <div className="hero-thumbs absolute bottom-8 md:bottom-10 left-0 right-0 z-20 flex items-center justify-center gap-3 px-4">
+      {/* Left arrow */}
+      <button
+        onClick={goPrev}
+        className="w-9 h-9 flex items-center justify-center rounded-full border border-white/20 text-white/50 hover:text-white hover:border-white/50 transition-all duration-200"
+        aria-label="Previous product"
       >
-        {products.map((p, i) => (
-          <button
-            key={p.id}
-            onClick={() => onProductChange(i)}
-            className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg md:text-xl transition-all duration-300 border-2"
-            style={{
-              borderColor: i === activeIndex ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.15)",
-              backgroundColor:
-                i === activeIndex ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)",
-              transform: i === activeIndex ? "scale(1.15)" : "scale(1)",
-            }}
-            aria-label={`Switch to ${p.name}`}
-            title={p.name}
-          >
-            {p.emoji}
-          </button>
-        ))}
+        <ChevronLeft size={16} strokeWidth={1.5} />
+      </button>
+
+      {/* Thumbnails */}
+      <div className="flex items-center gap-2">
+        {visible.map((p, i) => {
+          const realIndex = start + i;
+          const isActive = realIndex === activeIndex;
+          return (
+            <button
+              key={p.id}
+              onClick={() => onProductChange(realIndex)}
+              className="flex-shrink-0 rounded-full flex items-center justify-center transition-all duration-300"
+              style={{
+                width: 56,
+                height: 56,
+                border: isActive ? "2px solid rgba(255,255,255,0.85)" : "1.5px solid rgba(255,255,255,0.15)",
+                backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+                transform: isActive ? "scale(1.1)" : "scale(1)",
+                fontFamily: "var(--font-playfair)",
+                fontWeight: 700,
+                fontSize: 18,
+                color: isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.35)",
+                letterSpacing: "0.5px",
+              }}
+              aria-label={`Switch to ${p.name}`}
+              title={p.name}
+            >
+              {getInitial(p.name)}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Right arrow */}
+      <button
+        onClick={goNext}
+        className="w-9 h-9 flex items-center justify-center rounded-full border border-white/20 text-white/50 hover:text-white hover:border-white/50 transition-all duration-200"
+        aria-label="Next product"
+      >
+        <ChevronRight size={16} strokeWidth={1.5} />
+      </button>
+
+      {/* Counter */}
+      <span className="text-[11px] font-light text-white/30 tracking-wider ml-2">
+        {activeIndex + 1}/{products.length}
+      </span>
     </div>
   );
 }

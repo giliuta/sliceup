@@ -18,8 +18,11 @@ export default function ProductVideo({ product }: ProductVideoProps) {
   }, [product.id]);
 
   return (
-    <div className="relative w-full aspect-square">
-      {/* Video layer */}
+    <div
+      className="relative"
+      style={{ width: "55vmin", height: "73vmin", maxWidth: "480px", maxHeight: "640px" }}
+    >
+      {/* Video layer — shown when video files exist */}
       <video
         ref={videoRef}
         autoPlay
@@ -27,22 +30,38 @@ export default function ProductVideo({ product }: ProductVideoProps) {
         loop
         playsInline
         preload="auto"
-        className="video-blend absolute inset-0 w-full h-full object-contain"
+        className="video-blend absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500"
         key={product.id}
+        onLoadedData={(e) => {
+          (e.target as HTMLVideoElement).style.opacity = "1";
+        }}
       >
         <source src={product.video.webm} type="video/webm" />
         <source src={product.video.mp4} type="video/mp4" />
       </video>
 
-      {/* Fallback: emoji placeholder when no video available */}
-      <div className="absolute inset-0 flex items-center justify-center text-[120px] md:text-[180px] select-none pointer-events-none">
-        {product.emoji}
+      {/* Placeholder — large product name, visible until real media loads */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span
+          className="text-white/[0.12] text-center leading-none select-none pointer-events-none"
+          style={{
+            fontFamily: "var(--font-playfair)",
+            fontWeight: 900,
+            fontSize: "clamp(60px, 12vmin, 140px)",
+          }}
+        >
+          {product.name}
+        </span>
       </div>
 
-      {/* Glow effect behind product */}
+      {/* Glow behind product */}
       <div
-        className="absolute inset-0 rounded-full blur-[80px] opacity-20 -z-10 scale-75"
-        style={{ backgroundColor: product.theme.accent }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] rounded-full opacity-25 -z-10"
+        style={{
+          backgroundColor: product.theme.accent,
+          filter: "blur(100px)",
+          transition: "background-color 0.6s ease",
+        }}
       />
     </div>
   );
