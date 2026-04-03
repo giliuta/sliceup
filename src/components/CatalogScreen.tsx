@@ -66,10 +66,10 @@ export default function CatalogScreen() {
 
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
           {filtered.map((p) => (
-            <div key={p.id} className="catalog-card flex-shrink-0 snap-center rounded-2xl p-4 flex flex-col items-center group"
-              style={{ width: 180, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", transition: "border-color 0.3s" }}>
-              <div className="w-28 h-36 mb-3 flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-300">
-                <Image src={p.images.pack} alt={p.name} width={112} height={144} className="w-full h-full object-contain" />
+            <div key={p.id} className="catalog-card flex-shrink-0 snap-center rounded-2xl p-5 flex flex-col items-center group hover:border-white/15 transition-all duration-300"
+              style={{ width: 200, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="w-32 h-40 mb-3 flex items-center justify-center group-hover:-translate-y-1.5 transition-transform duration-300">
+                <Image src={p.images.pack} alt={p.name} width={128} height={160} className="w-full h-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]" />
               </div>
               <p className="text-xs opacity-40 uppercase tracking-wider mb-1">{p.subtitle}</p>
               <p className="text-sm font-semibold mb-1" style={{ fontFamily: "var(--font-playfair)" }}>{p.name}</p>
