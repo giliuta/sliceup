@@ -27,9 +27,20 @@ function AnimatedPrice({ value }: { value: number }) {
   return <span ref={ref}>{formatPrice(value)}</span>;
 }
 
+// Fixed particles — no Math.random() to avoid hydration mismatch
+const PARTICLE_DATA = [
+  { top: "14%", left: "8%", size: 4, dur: 7, delay: 0 },
+  { top: "72%", left: "85%", size: 3, dur: 9, delay: 1.5 },
+  { top: "28%", left: "62%", size: 5, dur: 8, delay: 0.8 },
+  { top: "65%", left: "22%", size: 3, dur: 10, delay: 2.5 },
+  { top: "45%", left: "92%", size: 4, dur: 7.5, delay: 1 },
+  { top: "82%", left: "48%", size: 3, dur: 11, delay: 3 },
+  { top: "18%", left: "75%", size: 5, dur: 8.5, delay: 0.5 },
+  { top: "55%", left: "12%", size: 4, dur: 9.5, delay: 2 },
+];
+
 function Particles() {
-  const dots = Array.from({ length: 10 }, () => ({ top: `${10 + Math.random() * 80}%`, left: `${5 + Math.random() * 90}%`, size: 3 + Math.random() * 3, dur: 6 + Math.random() * 6, delay: Math.random() * 4 }));
-  return (<div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>{dots.map((d, i) => (<div key={i} className="absolute rounded-full" style={{ top: d.top, left: d.left, width: d.size, height: d.size, background: "rgba(255,255,255,0.07)", animation: `particleDrift ${d.dur}s ease-in-out ${d.delay}s infinite` }} />))}</div>);
+  return (<div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>{PARTICLE_DATA.map((d, i) => (<div key={i} className="absolute rounded-full" style={{ top: d.top, left: d.left, width: d.size, height: d.size, background: "rgba(255,255,255,0.07)", animation: `particleDrift ${d.dur}s ease-in-out ${d.delay}s infinite` }} />))}</div>);
 }
 
 // Color burst on product switch
@@ -146,7 +157,7 @@ export default function HeroScreen({ activeIndex, thumbPage, onProductChange }: 
       <Particles />
 
       {/* Vignette */}
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 50, background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%)" }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 50, background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.2) 100%)" }} />
 
       {/* Glow blobs */}
       <div className="absolute pointer-events-none" style={{ width: 500, height: 500, top: "10%", left: "-8%", background: "currentColor", opacity: 0.08, borderRadius: "50%", filter: "blur(120px)", animation: "glowPulse 6s ease-in-out infinite", color: product.theme.accent, transition: "color 0.8s" }} />
@@ -159,15 +170,15 @@ export default function HeroScreen({ activeIndex, thumbPage, onProductChange }: 
 
       {/* BG TEXT — parallax opposite to pack */}
       <div ref={bgTextRef} className="hero-bg-text absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden will-change-transform" style={{ zIndex: 1 }}>
-        <span style={{ fontFamily: "var(--font-playfair)", fontWeight: 900, fontSize: "clamp(100px, 22vw, 400px)", textTransform: "uppercase", color: "rgba(255,255,255,0.12)", lineHeight: 0.85, whiteSpace: "nowrap", letterSpacing: 10 }}>{product.name}</span>
+        <span style={{ fontFamily: "var(--font-playfair)", fontWeight: 900, fontSize: product.name.length > 10 ? "clamp(50px, 10vw, 180px)" : product.name.length > 6 ? "clamp(60px, 15vw, 280px)" : "clamp(100px, 22vw, 400px)", textTransform: "uppercase", color: "rgba(255,255,255,0.08)", lineHeight: 0.85, whiteSpace: "nowrap", letterSpacing: 8 }}>{product.name}</span>
       </div>
 
       {/* PACKS — 3D tilt via perspective */}
       <div className="absolute inset-0 flex items-center justify-center" data-cursor-label="Explore" style={{ zIndex: 4, transformStyle: "preserve-3d" }}>
         {products.map((p, i) => (
           <div key={p.id} ref={(el) => { packRefs.current[i] = el; }}
-            className="absolute will-change-transform md:translate-x-[5%] -translate-y-[5%] md:translate-y-0"
-            style={{ maxWidth: 320, maxHeight: 460, width: "52vmin", height: "70vmin", visibility: i === 0 ? "visible" : "hidden", transformStyle: "preserve-3d" }}>
+            className="absolute will-change-transform md:translate-x-[5%] -translate-y-[15%] md:-translate-y-[2%]"
+            style={{ maxWidth: 340, maxHeight: 480, width: "55vmin", height: "72vmin", visibility: i === 0 ? "visible" : "hidden", transformStyle: "preserve-3d" }}>
             <Image src={p.images.pack} alt={p.name} width={350} height={500}
               className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.3)]"
               priority={i < 3} loading="eager" />
@@ -205,7 +216,7 @@ export default function HeroScreen({ activeIndex, thumbPage, onProductChange }: 
       </div>
 
       {/* MOBILE INFO */}
-      <div className="absolute z-10 md:hidden left-0 right-0 bottom-0 px-5 pb-5 pt-14 text-center" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)" }}>
+      <div className="absolute z-10 md:hidden left-0 right-0 bottom-0 px-5 pb-5 pt-20 text-center" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)" }}>
         <div className="hero-mobile-inner">
           <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 3, opacity: 0.6, marginBottom: 3 }}>{product.subtitle}</p>
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -250,12 +261,12 @@ export default function HeroScreen({ activeIndex, thumbPage, onProductChange }: 
       </div>
 
       {/* BOTTOM PRICE (desktop) */}
-      <div className="hero-bottom-price absolute z-10 hidden md:block" style={{ bottom: 40, left: "50%", transform: "translateX(-50%)" }}>
+      <div className="hero-bottom-price absolute z-10 hidden md:block" style={{ bottom: 48, left: "50%", transform: "translateX(-50%)" }}>
         <span style={{ fontFamily: "var(--font-playfair)", fontSize: 48, fontWeight: 700 }}><AnimatedPrice value={product.price} /></span>
       </div>
 
       {/* Testimonials ticker */}
-      <div className="hero-ticker absolute z-10 hidden md:block left-0 right-0 overflow-hidden" style={{ bottom: 12, opacity: 0.2 }}>
+      <div className="hero-ticker absolute z-10 hidden md:block left-0 right-0 overflow-hidden" style={{ bottom: 10, opacity: 0.15 }}>
         <div className="whitespace-nowrap" style={{ animation: "marquee 40s linear infinite", fontSize: 11, letterSpacing: 1 }}><span>{tickerText}</span><span className="ml-8">{tickerText}</span></div>
       </div>
     </div>
