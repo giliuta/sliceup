@@ -227,21 +227,30 @@ export default function Home() {
         </span>
       </div>
 
-      {/* ===== PRODUCT PACK (z-2, center) ===== */}
+      {/* ===== PRODUCT PACKS — all preloaded, only active visible ===== */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
-        <div
-          className="product-pack will-change-transform md:translate-x-[5%] -translate-y-[5%] md:translate-y-0"
-          style={{ maxWidth: 320, maxHeight: 460, width: "52vmin", height: "70vmin", transformStyle: "preserve-3d" }}
-        >
-          <Image
-            src={product.images.pack}
-            alt={product.name}
-            width={350}
-            height={500}
-            className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.25)]"
-            priority
-          />
-        </div>
+        {products.map((p, i) => (
+          <div
+            key={p.id}
+            className={`product-pack-item absolute will-change-transform md:translate-x-[5%] -translate-y-[5%] md:translate-y-0 ${i === activeIndex ? "product-pack" : ""}`}
+            style={{
+              maxWidth: 320, maxHeight: 460, width: "52vmin", height: "70vmin",
+              transformStyle: "preserve-3d",
+              visibility: i === activeIndex ? "visible" : "hidden",
+              position: "absolute",
+            }}
+          >
+            <Image
+              src={p.images.pack}
+              alt={p.name}
+              width={350}
+              height={500}
+              className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.25)]"
+              priority={i < 3}
+              loading={i < 3 ? "eager" : "eager"}
+            />
+          </div>
+        ))}
       </div>
 
       {/* ===== LEFT BLOCK (desktop) ===== */}
